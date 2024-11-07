@@ -1,26 +1,54 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import FormStep1 from './components/FormStep1';
+import FormStep2 from './components/FormStep2';
+import { submitLead } from './services/api';
 
-function App() {
+// Define the interface for form data
+interface FormData {
+  estateType: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  region: string;
+  district: string;
+}
+
+const App: React.FC = () => {
+  const [formStep, setFormStep] = useState(1);
+  const [formData, setFormData] = useState<FormData>({
+    estateType: '',
+    fullName: '',
+    phone: '',
+    email: '',
+    region: '',
+    district: ''
+  });
+
+  const nextStep = (data: Partial<FormData>) => {
+    setFormData((prevData) => ({ ...prevData, ...data }));
+    setFormStep(2);
+  };
+
+  const submitForm = async (data: Partial<FormData>) => {
+    const fullData = { ...formData, ...data };
+    try {
+      await submitLead(fullData);
+      alert('Lead submitted successfully!');
+    } catch (error) {
+      alert('Failed to submit lead');
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <h1>Real Estate Form</h1>
+      {formStep === 1 ? (
+        <FormStep1 nextStep={nextStep} />
+      ) : (
+        <FormStep2 submitForm={submitForm} />
+      )}
     </div>
   );
-}
+};
 
 export default App;
