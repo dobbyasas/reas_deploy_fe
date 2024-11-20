@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import FormStep1 from './components/FormStep1';
 import FormStep2 from './components/FormStep2';
 import Header from './components/Header';
@@ -22,7 +23,7 @@ const App: React.FC = () => {
     phone: '',
     email: '',
     region: '',
-    district: ''
+    district: '',
   });
   const [submitted, setSubmitted] = useState(false);
 
@@ -46,7 +47,7 @@ const App: React.FC = () => {
     }
   };
 
-  return (
+  const Form = () => (
     <div className="app-wrapper">
       <Header />
       {submitted ? (
@@ -75,6 +76,13 @@ const App: React.FC = () => {
         <FormStep2 submitForm={submitForm} goToStep1={goToStep1} />
       )}
     </div>
+  );
+
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/chci-nabidku" />} />
+      <Route path="/chci-nabidku" element={<Form />} />
+    </Routes>
   );
 };
 
