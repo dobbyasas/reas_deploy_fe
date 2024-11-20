@@ -1,12 +1,23 @@
+// komunikace s api pomocí knihovny axios
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5001/lead'; // Your backend API URL
+// url pro api endpoint v dockeru
+const API_URL = process.env.REACT_APP_API_URL || "http://backend:5001";
 
-export const submitLead = async (leadData: any) => {
+// odešle data z formuláře na server
+export const submitLead = async (leadData: { 
+  estateType: string; 
+  fullName: string; 
+  phone: string; 
+  email: string; 
+  region: string; 
+  district: string; 
+}) => {
   try {
-    const response = await axios.post(API_URL, leadData);
-    return response.data;
+    // odeslání post na api endpoint
+    const response = await axios.post(`${API_URL}/lead`, leadData);
+    return response.data; // vrací data z api (např. potvrzení o úspěchu)
   } catch (error) {
-    throw new Error('Error submitting lead');
+    throw new Error('Chyba při odesílání leadu');
   }
 };

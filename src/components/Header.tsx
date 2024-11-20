@@ -1,3 +1,5 @@
+// jednoduchý header ukradenej z vaší stránky
+
 import React from 'react';
 import '../styles/Header.scss';
 import logo from '../assets/logo.png';

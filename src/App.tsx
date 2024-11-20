@@ -3,7 +3,7 @@ import FormStep1 from './components/FormStep1';
 import FormStep2 from './components/FormStep2';
 import Header from './components/Header';
 import { submitLead } from './services/api';
-import './styles.scss';
+import './styles/styles.scss';
 
 interface FormData {
   estateType: string;
@@ -51,8 +51,8 @@ const App: React.FC = () => {
       <Header />
       {submitted ? (
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-          <h1 style={{ color: '#1975f0' }}>Thank You!</h1>
-          <p>Your lead has been submitted successfully. We'll contact you soon.</p>
+          <h1 style={{ color: '#1975f0' }}>Děkujeme!</h1>
+          <p>Vaše nemovitost byla uložena. Brzy Vás kontaktujeme.</p>
           <button
             onClick={goToStep1}
             style={{
@@ -66,7 +66,7 @@ const App: React.FC = () => {
               marginTop: '1rem',
             }}
           >
-            Back to Step 1
+            Zpět
           </button>
         </div>
       ) : formStep === 1 ? (

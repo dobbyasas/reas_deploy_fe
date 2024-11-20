@@ -1,62 +1,38 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
+// props pro komponentu
 interface FormStep2Props {
-  submitForm: (data: any) => void;
-  goToStep1: () => void; // Function to go back to FormStep1
+  submitForm: (data: any) => void; // funkce pro zpracování odeslaných dat
+  goToStep1: () => void; // funkce pro návrat na první krok
 }
 
+// validace formuláře pomocí Yup
 const schema = yup.object().shape({
-  fullname: yup.string().required('Full name is required'),
+  fullname: yup.string().required('Je potřeba celé jméno'),
   phone: yup
     .string()
-    .matches(/^[+]?420? ?\d{3} ?\d{3} ?\d{3}$/, 'Invalid phone number')
-    .required('Phone is required'),
-  email: yup.string().email('Invalid email').required('Email is required'),
+    .matches(/^[+]?420? ?\d{3} ?\d{3} ?\d{3}$/, 'Špatné telefonní číslo (formát by měl být +420123456789)') // validace českého formátu telefonního čísla
+    .required('Prosím vyplňte telefonní číslo'),
+  email: yup.string().email('Nesprávný formát emailu').required('Prosím vyplňte emailovou adresu'),
 });
 
-const FormStep2: React.FC<FormStep2Props> = ({ submitForm, goToStep1 }) => {
+const FormStep2: React.FC<FormStep2Props> = ({ submitForm }) => {
   const { register, handleSubmit, formState: { errors } } = useForm({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema), // použití Yup validace
   });
 
-  const [isSubmitted, setIsSubmitted] = useState(false); // Track submission state
-
+  // funkce pro odeslání, uloží data
   const onSubmit = (data: any) => {
-    submitForm(data); // Pass data to the API
-    setIsSubmitted(true); // Show thank-you message after submission
+    submitForm(data);
   };
-
-  if (isSubmitted) {
-    return (
-      <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-        <h1 style={{ color: '#1975f0' }}>Thank You!</h1>
-        <p>Your submission has been received. We will contact you soon.</p>
-        <button
-          onClick={goToStep1}
-          style={{
-            backgroundColor: '#1975f0',
-            color: '#fff',
-            border: 'none',
-            padding: '1rem 2rem',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            marginTop: '1rem',
-          }}
-        >
-          Back to Step 1
-        </button>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div>
-        <label>Full Name</label>
+        <label>Celé jméno</label>
         <input
           {...register('fullname')}
           onFocus={(e) => (e.target.style.borderColor = '#1975f0')}
@@ -65,7 +41,7 @@ const FormStep2: React.FC<FormStep2Props> = ({ submitForm, goToStep1 }) => {
         <p>{errors.fullname?.message}</p>
       </div>
       <div>
-        <label>Phone</label>
+        <label>Telefonní číslo</label>
         <input
           {...register('phone')}
           onFocus={(e) => (e.target.style.borderColor = '#1975f0')}
@@ -82,7 +58,7 @@ const FormStep2: React.FC<FormStep2Props> = ({ submitForm, goToStep1 }) => {
         />
         <p>{errors.email?.message}</p>
       </div>
-      <button type="submit">Submit</button>
+      <button type="submit">Poslat</button>
     </form>
   );
 };

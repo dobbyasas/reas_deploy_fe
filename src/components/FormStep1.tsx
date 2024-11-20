@@ -1,3 +1,7 @@
+// umožňuje uživateli vybrat typ nemovitosti, kraj a okres
+// obsahuje interaktivní mapu České republiky a seznam okresů, které se zobrazí podle zvoleného kraje
+// mapa by mohla být v separátní komponentě
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -12,8 +16,10 @@ import dumIcon from '../assets/icons/ico-house.png';
 import chataIcon from '../assets/icons/ico-cabin.png';
 import stavebniPozemekIcon from '../assets/icons/ico-land.png';
 
+// inicalizace mapy
 HighchartsMap(Highcharts);
 
+// props pro komponentu
 interface FormStep1Props {
   nextStep: (data: any) => void;
 }
@@ -25,12 +31,15 @@ const estateIcons: Record<string, string> = {
   'Stavební pozemek': stavebniPozemekIcon,
 };
 
+// validace formuláře pomocí Yup
 const schema = yup.object().shape({
-  estateType: yup.string().required('Estate type is required'),
-  region: yup.string().required('Region is required'),
-  district: yup.string().required('District is required'),
+  estateType: yup.string().required('Prosím vyberte druh nemovitosti'),
+  region: yup.string().required('Prosím vyberte kraj'),
+  district: yup.string().required('Prosím vyberte okres'),
 });
 
+// data okresů pro kraje 
+// určitě by to šlo udělat lépe skrze data mapy, ale bohužel jelikož jsem na podobné mapě dělal poprvé, nepodařilo se mi to, takže tohle je moje ne-elegantní řešení problému
 const districtMapping: Record<string, string[]> = {
   'Praha': ['Praha'],
   'Stredocesky': ['Benešov', 'Beroun', 'Kladno', 'Kolín', 'Kutná Hora', 'Mělník', 'Mladá Boleslav', 'Nymburk', 'Praha-východ', 'Praha-západ', 'Příbram', 'Rakovník'],
@@ -52,12 +61,13 @@ const FormStep1: React.FC<FormStep1Props> = ({ nextStep }) => {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
   });
-  const [selectedEstateType, setSelectedEstateType] = useState<string | null>(null);
+  const [selectedEstateType, setSelectedEstateType] = useState<string | null>(null); 
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [districts, setDistricts] = useState<string[]>([]);
 
   const estateTypes = ['Byt', 'Dům', 'Chata', 'Stavební pozemek'];
 
+  // funkce pro validaci a odeslání formuláře
   const onSubmit = (data: any) => {
     if (!selectedEstateType) {
       alert('Please select an estate type!');
@@ -72,22 +82,22 @@ const FormStep1: React.FC<FormStep1Props> = ({ nextStep }) => {
       return;
     }
 
-    // Combine data for next step
     const formData = {
       ...data,
       estateType: selectedEstateType,
       region: selectedRegion,
     };
 
-    console.log('Form Submitted:', formData);
     nextStep(formData);
   };
 
+  // nastaví typ nemovitosti a uloží ho do formuláře
   const handleEstateTypeClick = (type: string) => {
     setSelectedEstateType(type);
     setValue('estateType', type);
   };
 
+  // funkce pro výběr okresu
   const handleRegionClick = (regionKey: string) => {
     const region = mapDataCZ.objects.default.geometries.find(
       (region) => region.properties['hc-key'] === regionKey
@@ -95,8 +105,8 @@ const FormStep1: React.FC<FormStep1Props> = ({ nextStep }) => {
   
     if (region) {
       const regionName = region.properties.name
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
+        .normalize('NFD') // normalizace diakritiky
+        .replace(/[\u0300-\u036f]/g, ''); // odebere diakritiku
   
       if (selectedRegion === regionName) {
         setSelectedRegion(null);
@@ -110,6 +120,7 @@ const FormStep1: React.FC<FormStep1Props> = ({ nextStep }) => {
     }
   };
   
+  // konfigurace mapy samotné
   const mapOptions: Highcharts.Options = {
     chart: {
       map: mapDataCZ,
@@ -178,8 +189,9 @@ const FormStep1: React.FC<FormStep1Props> = ({ nextStep }) => {
 
   return (
     <form className="form" onSubmit={handleSubmit(onSubmit)}>
+      <h1>Kde se nachází Vaše nemovitost?</h1>
       <div>
-        <label className="label">Estate Type</label>
+        <label className="label">Vyberte druh nemovitosti</label>
         <div className="estate-buttons">
           {estateTypes.map((type) => (
             <button
@@ -201,6 +213,7 @@ const FormStep1: React.FC<FormStep1Props> = ({ nextStep }) => {
       </div>
       <div>
         <div id="container" className="map-container">
+        <label className="label">Vyberte kraj kliknutím na mapu</label>
           <HighchartsReact
             highcharts={Highcharts}
             constructorType={'mapChart'}
@@ -210,25 +223,24 @@ const FormStep1: React.FC<FormStep1Props> = ({ nextStep }) => {
         <p className="error-message">{errors.region?.message}</p>
       </div>
       {selectedRegion && (
-  <div>
-    <label className="label">District</label>
-    <div className="district-list">
-      {districts.map((district) => (
-        <div key={district} className="district-option">
-          <input
-            type="radio"
-            value={district}
-            id={district}
-            {...register('district')}
-          />
-          <label htmlFor={district}>{district}</label>
+        <div>
+          <label className="label">Vyberte okres</label>
+          <div className="district-list">
+            {districts.map((district) => (
+              <div key={district} className="district-option">
+                <input
+                  type="radio"
+                  value={district}
+                  id={district}
+                  {...register('district')}
+                />
+                <label htmlFor={district}>{district}</label>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
-    </div>
-  </div>
-)}
-
-      <button type="submit">Next</button>
+      )}
+      <button type="submit">Další</button>
     </form>
   );
 };
